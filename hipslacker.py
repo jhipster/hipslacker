@@ -48,9 +48,6 @@ def genapp(command):
     response = f"Received your request to create a {command[0]} application"
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
-def show_dialog(user, channel, trigger):
-    slack_client.dialo
-
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
