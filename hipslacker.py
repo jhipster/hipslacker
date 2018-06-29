@@ -48,7 +48,7 @@ def genapp(command):
     response = f"Received your request to create a {command[0]} application"
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
-def generate_application(payload):
+def generate_application(channel, payload):
     payload = {
         "generator-jhipster": {
             "applicationType": "monolith",
@@ -91,7 +91,25 @@ def generate_application(payload):
         logger.error("Error while generating! status: {}, text: {}".format(r.status_code, r.text))
         return "An error occured while generating the application :sadpanda:"
     else:
-        return "Link of your application: https://github.com/hipslacker/{}".format(payload['generator-jhipster']['baseName'])
+        timeout = time.time() + 60
+        app_id = r.text
+        while True:
+            # get status of generation
+            r = requests.get("https://start.jhipster.tech/api/generate-application/{}".format(app_id), headers=headers)
+            if r.status_code == 200:
+                # post status of generation
+                slack_client.api_call('chat.postMessage', channel=channel, text=r.text, as_user=True)
+                if "Generation finished" in r.text:
+                    return "Link of your application: https://github.com/hipslacker/{}".format(payload['generator-jhipster']['baseName'])
+            else:
+                logger.error("Error while getting status of generation! status: {}, text: {}".format(r.status_code, r.text))
+                return "An error occured while getting status of generation :sadpanda:"
+            time.sleep(0.5)
+
+            # break the loop after 1min
+            if time.time() > timeout:
+                logger.error("Timeout while waiting for generation! status: {}, text: {}".format(r.status_code, r.text))
+                return "Timeout while waiting for generation :sadpanda:"
 
 
 def get_token():
