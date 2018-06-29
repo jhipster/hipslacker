@@ -50,7 +50,7 @@ def genapp(command, channel):
     print("with commands: ")
     print(*commandList, sep="\n")
     apptype = commandList[0]
-    response = f"I got your request to create a {apptype} application."
+    slack_client.api_call('chat.postMessage', channel=channel, text=f"I got your request to create a {apptype} application.", as_user=True)
     payload = generate_payload()
     d = payload["generator-jhipster"]
     print("at start, load is: " + json.dumps(d, indent=1))
@@ -77,9 +77,14 @@ def genapp(command, channel):
             dbUpdate(d, rslt[0], rslt[1], rslt[2])
         print("payload is now: " + json.dumps(d, indent=1))
 
+    # special case for microservice
+    if d["applicationType"] == "microservice":
+        d["serviceDiscoveryType"] = "eureka"
+        d["cacheProvider"] = "hazelcast"
+        d["serverPort"] = 8081
+
     print("\n\npayload is" + json.dumps(payload, indent=4))
-    generate_application(payload, channel)
-    # print json.dumps(d, indent=4)
+    response = generate_application(channel, payload)
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
 
