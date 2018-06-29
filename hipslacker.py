@@ -38,11 +38,12 @@ def handle_command(command, channel, user):
     except Exception as e:
         logger.error('Unable to get username : ' + str(e))
 
-    response = "Yo hipster, to get started give me a make command." 
+    response = "Yo hipster, to get started give me a make command."
 
     # post bot's message
     slack_client.api_call('chat.postMessage', channel=channel,
                           text=response, as_user=True)
+
 
 def genapp(command, channel):
     commandList = re.split("\s+", command)
@@ -57,11 +58,11 @@ def genapp(command, channel):
         key = commandList[i]
         print(f"processing {key}")
         cmdswitch = {
-            "microservice": ["applicationType", key], 
+            "microservice": ["applicationType", key],
             "monolith": ["applicationType", key],
             "react": ["clientFramework", "react"],
             "angular": ["clientFramework", "angularX"],
-            "named": ["baseName", commandList[i+1]] if i < len(commandList)-1 else ["baseName", "test"],
+            "named": ["baseName", commandList[i + 1]] if i < len(commandList) - 1 else ["baseName", "test"],
             "mysql": ["sql", "h2Disk", "mysql"],
             "cassandra": ["cassandra", "cassandra", "cassandra"],
             "mongo": ["mongodb", "mongodb", "mongodb"],
@@ -70,22 +71,24 @@ def genapp(command, channel):
         rslt = cmdswitch.get(key, ["nomatch"])
         print("result received")
         print(*rslt)
-        if(len(rslt) ==2):
+        if(len(rslt) == 2):
             d[rslt[0]] = rslt[1]
-        if(len(rslt)==3):
+        if(len(rslt) == 3):
             dbUpdate(d, rslt[0], rslt[1], rslt[2])
         print("payload is now: " + json.dumps(d, indent=1))
-    
+
     print("\n\npayload is" + json.dumps(payload, indent=4))
     generate_application(payload, channel)
     # print json.dumps(d, indent=4)
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
+
 def dbUpdate(dictionary, dbtype, dev, prod):
-    dictionary["databaseType"]= dbtype
-    dictionary["devDatabaseType"]= dev
-    dictionary["prodDatabaseType"]= prod
+    dictionary["databaseType"] = dbtype
+    dictionary["devDatabaseType"] = dev
+    dictionary["prodDatabaseType"] = prod
     return ["already processed"]
+
 
 def generate_payload():
     return {
@@ -122,38 +125,53 @@ def generate_payload():
         }
     }
 
+
 def generate_application(channel, payload):
+    # get token
     token = get_token()
     if token is None:
-        return "An error occured while getting the token :sadpanda:"
+        return "Error while getting the token :sadpanda:"
+
+    # start generation
     headers = {"Authorization": "Bearer {}".format(token)}
     r = requests.post("https://start.jhipster.tech/api/generate-application", data=json.dumps(payload), headers=headers)
-    if r.status_code != 201:
-        logger.error("Error while generating! status: {}, text: {}".format(r.status_code, r.text))
-        return "An error occured while generating the application :sadpanda:"
-    else:
-        timeout = time.time() + 60
-        app_id = r.text
-        while True:
-            # get status of generation
-            r = requests.get("https://start.jhipster.tech/api/generate-application/{}".format(app_id), headers=headers)
-            if r.status_code == 200:
-                # post status of generation
-                slack_client.api_call('chat.postMessage', channel=channel, text=r.text, as_user=True)
-                if "Generation finished" in r.text:
-                    return "Link of your application: https://github.com/hipslacker/{}".format(payload['generator-jhipster']['baseName'])
-            else:
-                logger.error("Error while getting status of generation! status: {}, text: {}".format(r.status_code, r.text))
-                return "An error occured while getting status of generation :sadpanda:"
-            time.sleep(0.5)
 
-            # break the loop after 1min
-            if time.time() > timeout:
-                logger.error("Timeout while waiting for generation! status: {}, text: {}".format(r.status_code, r.text))
-                return "Timeout while waiting for generation :sadpanda:"
+    # post error if generation failed
+    if r.status_code != 201:
+        logger.error("Generation error, status: {}, text: {}".format(r.status_code, r.text))
+        return "Error while generating the application :sadpanda:"
+
+    # get status of generation every 500ms during 1min
+    timeout = time.time() + 60
+    app_id = r.text
+    while True:
+        # get status of generation
+        r = requests.get("https://start.jhipster.tech/api/generate-application/{}".format(app_id), headers=headers)
+
+        # post error if getting status failed
+        if r.status_code != 200:
+            logger.error("Generation status error, status: {}, text: {}".format(r.status_code, r.text))
+            return "Error while getting status of generation :sadpanda:"
+
+        # post status of generation
+        slack_client.api_call('chat.postMessage', channel=channel, text=r.text, as_user=True)
+
+        # post link to repo when generation is finished
+        if "Generation finished" in r.text:
+            return "Link of your application: https://github.com/hipslacker/{}".format(payload['generator-jhipster']['baseName'])
+
+        # break the loop after a specific timeout
+        if time.time() > timeout:
+            logger.error("Generation status timeout, status: {}, text: {}".format(r.status_code, r.text))
+            return "The generation timed out :sadpanda:"
+
+        time.sleep(0.5)
 
 
 def get_token():
+    """
+        Get a JWT using credentials for the account "hipslacker"
+    """
     url = "https://start.jhipster.tech/api/authenticate"
     data = {"password": os.environ.get('JHIP_PASS'), "username": "hipslacker"}
     r = requests.post(url, json=data)
