@@ -40,6 +40,61 @@ def handle_command(command, channel, user):
                           text=response, as_user=True)
 
 
+def generate_application(payload):
+    payload = {
+        "generator-jhipster": {
+            "applicationType": "monolith",
+            "gitHubOrganization": "hipslacker",
+            "baseName": "test",
+            "packageName": "io.github.hipslacker.application",
+            "packageFolder": "io/github/hipslacker/application",
+            "serverPort": 8080,
+            "serviceDiscoveryType": False,
+            "authenticationType": "jwt",
+            "uaaBaseName": "../uaa",
+            "cacheProvider": "ehcache",
+            "enableHibernateCache": True,
+            "websocket": False,
+            "databaseType": "sql",
+            "devDatabaseType": "h2Disk",
+            "prodDatabaseType": "mysql",
+            "searchEngine": False,
+            "enableSwaggerCodegen": False,
+            "messageBroker": False,
+            "buildTool": "maven",
+            "useSass": False,
+            "clientPackageManager": "yarn",
+            "testFrameworks": [],
+            "enableTranslation": False,
+            "nativeLanguage": "en",
+            "languages": [
+                "en"
+            ],
+            "clientFramework": "react",
+            "jhiPrefix": "jhi"
+        }
+    }
+    token = get_token()
+    headers = {"Authorization": "Bearer {}".format(token)}
+    r = requests.post("https://start.jhipster.tech/api/generate-application", data=json.dumps(payload), headers=headers)
+    if r.status_code != 201:
+        logger.error("Error while generating! status: {}, text: {}".format(r.status_code, r.text))
+        return "An error occured while generating the application :sadpanda:"
+    else:
+        return "Link of your application: https://github.com/hipslacker/{}".format(payload['generator-jhipster']['baseName'])
+
+
+def get_token():
+    url = "https://start.jhipster.tech/api/authenticate"
+    data = {"password": os.environ.get('JHIP_PASS'), "username": os.environ.get('JHIP_USERNAME'), "rememberMe": False}
+    r = requests.post(url, json=data)
+    if r.status_code != 200:
+        logger.error("Error while getting the token! status: {}, text: {}".format(r.status_code, r.text))
+        return "An error occured while getting the token :sadpanda:"
+    else:
+        return r.json()['idToken']
+
+
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
