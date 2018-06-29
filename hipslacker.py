@@ -45,15 +45,46 @@ def handle_command(command, channel, user):
                           text=response, as_user=True)
 
 def genapp(command, channel):
-    commanndList = re.split("\s+", command)
+    commandList = re.split("\s+", command)
     print("with commands: ")
-    print(*commanndList, sep="\n")
-    apptype = commanndList[0]
-    response = f"Received your request to create a "+apptype+" application"
+    print(*commandList, sep="\n")
+    apptype = commandList[0]
+    response = f"Received your request to create a {apptype} application"
+    payload = generate_payload()
+    d = payload["generator-jhipster"]
+    
+    for i in range(len(commandList)):
+        key = commandList[i]
+        print(f"processing {key}")
+        cmdswitch = {
+            "microservice": ["applicationType", key], 
+            "monolith": ["applicationType", key],
+            "angular": ["clientFramework", "angularX"],
+            "react": ["clientFramework", "react"],
+            "named": ["baseName", commandList[i+1]] if i < len(commandList)-1 else ["baseName", "test"],
+            "mysql": dbUpdate(d, "sql", "h2Disk", "mysql"),
+            "mongo": dbUpdate(d, "mongodb", "mongodb", "mongodb"),
+            "cassandra": dbUpdate(d, "cassandra", "cassandra", "cassandra")
+        }
+        print("get switch")
+        rslt = cmdswitch.get(key, ["nomatch"])
+        print("result received")
+        if(len(rslt) ==2):
+            d[rslt[0]] = rslt[1]
+    
+    print("\n\npayload is" + json.dumps(d, indent=4))
+
+    # print json.dumps(d, indent=4)
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
-def generate_application(channel, payload):
-    payload = {
+def dbUpdate(dictionary, dbtype, dev, prod):
+    dictionary["databaseType"]= dbtype
+    dictionary["devDatabaseType"]= dev
+    dictionary["prodDatabaseType"]= prod
+    return ["already processed"]
+
+def generate_payload():
+    return {
         "generator-jhipster": {
             "applicationType": "monolith",
             "gitHubOrganization": "hipslacker",
@@ -86,6 +117,8 @@ def generate_application(channel, payload):
             "jhiPrefix": "jhi"
         }
     }
+
+def generate_application(channel, payload):
     token = get_token()
     if token is None:
         return "An error occured while getting the token :sadpanda:"
