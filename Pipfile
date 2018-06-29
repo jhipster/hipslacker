@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 slackclient = "*"
+requests = "*"
 
 [dev-packages]
 

@@ -30,10 +30,10 @@ def handle_command(command, channel, user):
     try:
         # get username from Slack's API
         username = requests.get('https://slack.com/api/users.info', params={'token': BOT_TOKEN, 'user': username}).json()['user']['name']
-    except Exception, e:
+    except Exception as e:
         logger.error('Unable to get username : ' + str(e))
 
-    response = "Hello hipster"
+    response = "Hello hipster -> " + username
 
     # post bot's message
     slack_client.api_call('chat.postMessage', channel=channel,
