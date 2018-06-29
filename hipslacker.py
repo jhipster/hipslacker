@@ -86,13 +86,13 @@ def generate_application(payload):
 
 def get_token():
     url = "https://start.jhipster.tech/api/authenticate"
-    data = {"password": os.environ.get('JHIP_PASS'), "username": os.environ.get('JHIP_USERNAME'), "rememberMe": False}
+    data = {"password": os.environ.get('JHIP_PASS'), "username": "hipslacker"}
     r = requests.post(url, json=data)
     if r.status_code != 200:
         logger.error("Error while getting the token! status: {}, text: {}".format(r.status_code, r.text))
         return "An error occured while getting the token :sadpanda:"
     else:
-        return r.json()['idToken']
+        return r.json()['id_token']
 
 
 def parse_slack_output(slack_rtm_output):
