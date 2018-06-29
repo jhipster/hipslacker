@@ -26,6 +26,10 @@ def handle_command(command, channel, user):
         are valid commands. If so, then acts on the commands. If not,
         returns back what it needs for clarification.
     """
+    logger.info("Processing req " + command)
+    if(command.startswith("generate")):
+        genapp(command.split('generate', 1))
+        return
     username = user
     try:
         # get username from Slack's API
@@ -33,12 +37,19 @@ def handle_command(command, channel, user):
     except Exception as e:
         logger.error('Unable to get username : ' + str(e))
 
-    response = "Hello hipster -> " + username
+    response = "Yo hipster, to get started give me a make command." 
 
     # post bot's message
     slack_client.api_call('chat.postMessage', channel=channel,
                           text=response, as_user=True)
 
+def genapp(command):
+    logger.info('create cmd received' + " ,".join(command))
+    response = f"Received your request to create a {command[0]} application"
+    slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
+
+def show_dialog(user, channel, trigger):
+    slack_client.dialo
 
 def parse_slack_output(slack_rtm_output):
     """
@@ -49,6 +60,7 @@ def parse_slack_output(slack_rtm_output):
     output_list = slack_rtm_output
     if output_list and len(output_list) > 0:
         for output in output_list:
+            logger.info("Parsing " + json.dumps(output))
             if output and 'text' in output and AT_BOT in output['text']:
                 # return text after the @ mention, whitespace removed
                 return output['text'].split(AT_BOT)[1].strip().lower(), \
@@ -115,6 +127,8 @@ def run():
             command, channel, user = parse_slack_output(slack_client.rtm_read())
             if command and channel and user:
                 handle_command(command, channel, user)
+            elif channel and user:
+                show_dialog(user, channel, "testtrig")
             time.sleep(READ_WEBSOCKET_DELAY)
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt received.")
