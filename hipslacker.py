@@ -49,7 +49,7 @@ def genapp(command, channel):
     print("with commands: ")
     print(*commandList, sep="\n")
     apptype = commandList[0]
-    response = f"Received your request to create a {apptype} application"
+    response = f"I got your request to create a {apptype} application."
     payload = generate_payload()
     d = payload["generator-jhipster"]
     
@@ -73,7 +73,7 @@ def genapp(command, channel):
             d[rslt[0]] = rslt[1]
     
     print("\n\npayload is" + json.dumps(d, indent=4))
-
+    generate_application(payload, channel)
     # print json.dumps(d, indent=4)
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
