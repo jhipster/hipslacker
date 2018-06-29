@@ -4,6 +4,7 @@ import requests
 import json
 import datetime
 import logging
+import re
 from logging.handlers import RotatingFileHandler
 from slackclient import SlackClient
 
@@ -27,8 +28,8 @@ def handle_command(command, channel, user):
         returns back what it needs for clarification.
     """
     logger.info("Processing req " + command)
-    if(command.startswith("generate")):
-        genapp(command.split('generate', 1))
+    if(command.startswith("generate ")):
+        genapp(command.split('generate ', 1)[1], channel)
         return
     username = user
     try:
@@ -43,9 +44,12 @@ def handle_command(command, channel, user):
     slack_client.api_call('chat.postMessage', channel=channel,
                           text=response, as_user=True)
 
-def genapp(command):
-    logger.info('create cmd received' + " ,".join(command))
-    response = f"Received your request to create a {command[0]} application"
+def genapp(command, channel):
+    commanndList = re.split("\s+", command)
+    print("with commands: ")
+    print(*commanndList, sep="\n")
+    apptype = commanndList[0]
+    response = f"Received your request to create a "+apptype+" application"
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
 
 def generate_application(payload):
