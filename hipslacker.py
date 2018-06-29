@@ -52,27 +52,31 @@ def genapp(command, channel):
     response = f"I got your request to create a {apptype} application."
     payload = generate_payload()
     d = payload["generator-jhipster"]
-    
+    print("at start, load is: " + json.dumps(d, indent=1))
     for i in range(len(commandList)):
         key = commandList[i]
         print(f"processing {key}")
         cmdswitch = {
             "microservice": ["applicationType", key], 
             "monolith": ["applicationType", key],
-            "angular": ["clientFramework", "angularX"],
             "react": ["clientFramework", "react"],
+            "angular": ["clientFramework", "angularX"],
             "named": ["baseName", commandList[i+1]] if i < len(commandList)-1 else ["baseName", "test"],
-            "mysql": dbUpdate(d, "sql", "h2Disk", "mysql"),
-            "mongo": dbUpdate(d, "mongodb", "mongodb", "mongodb"),
-            "cassandra": dbUpdate(d, "cassandra", "cassandra", "cassandra")
+            "mysql": ["sql", "h2Disk", "mysql"],
+            "cassandra": ["cassandra", "cassandra", "cassandra"],
+            "mongo": ["mongodb", "mongodb", "mongodb"],
+            "default": ["nomatch"]
         }
-        print("get switch")
         rslt = cmdswitch.get(key, ["nomatch"])
         print("result received")
+        print(*rslt)
         if(len(rslt) ==2):
             d[rslt[0]] = rslt[1]
+        if(len(rslt)==3):
+            dbUpdate(d, rslt[0], rslt[1], rslt[2])
+        print("payload is now: " + json.dumps(d, indent=1))
     
-    print("\n\npayload is" + json.dumps(d, indent=4))
+    print("\n\npayload is" + json.dumps(payload, indent=4))
     generate_application(payload, channel)
     # print json.dumps(d, indent=4)
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
