@@ -75,6 +75,8 @@ def generate_application(payload):
         }
     }
     token = get_token()
+    if token is None:
+        return "An error occured while getting the token :sadpanda:"
     headers = {"Authorization": "Bearer {}".format(token)}
     r = requests.post("https://start.jhipster.tech/api/generate-application", data=json.dumps(payload), headers=headers)
     if r.status_code != 201:
@@ -90,7 +92,7 @@ def get_token():
     r = requests.post(url, json=data)
     if r.status_code != 200:
         logger.error("Error while getting the token! status: {}, text: {}".format(r.status_code, r.text))
-        return "An error occured while getting the token :sadpanda:"
+        return None
     else:
         return r.json()['id_token']
 
