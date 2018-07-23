@@ -87,6 +87,8 @@ def genapp(command, channel):
         d["cacheProvider"] = "hazelcast"
         d["serverPort"] = 8081
 
+    payload["repository-name"] = d["baseName"]
+
     print("\n\npayload is" + json.dumps(payload, indent=4))
     response = generate_application(channel, payload)
     slack_client.api_call('chat.postMessage', channel=channel, text=response, as_user=True)
@@ -103,7 +105,6 @@ def generate_payload():
     return {
         "generator-jhipster": {
             "applicationType": "monolith",
-            "gitHubOrganization": "hipslacker",
             "baseName": "test",
             "packageName": "io.github.hipslacker.application",
             "packageFolder": "io/github/hipslacker/application",
@@ -131,7 +132,10 @@ def generate_payload():
             ],
             "clientFramework": "react",
             "jhiPrefix": "jhi"
-        }
+        },
+        "git-provider": "GitHub",
+        "git-company": JHIPSTER_ONLINE_USER,
+        "repository-name": "jhipster-sample-application"
     }
 
 
