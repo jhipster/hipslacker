@@ -7,10 +7,15 @@ import logging
 import re
 from logging.handlers import RotatingFileHandler
 from slackclient import SlackClient
+from dotenv import load_dotenv
 
-# hipslacker's ID as an environment variable
-BOT_ID = os.environ.get('BOT_ID', '')
-BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN', '')
+# load environment variables
+load_dotenv()
+BOT_ID = os.getenv('BOT_ID', '')
+BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN', '')
+JHIPSTER_ONLINE_USER = os.getenv('JHIPSTER_ONLINE_USER', '')
+JHIPSTER_ONLINE_PWD = os.getenv('JHIPSTER_ONLINE_PWD', '')
+
 
 # constants
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -175,10 +180,10 @@ def generate_application(channel, payload):
 
 def get_token():
     """
-        Get a JWT using credentials for the account "hipslacker"
+        Get a JWT using credentials
     """
     url = "https://start.jhipster.tech/api/authenticate"
-    data = {"password": os.environ.get('JHIP_PASS'), "username": "hipslacker"}
+    data = {"password": JHIPSTER_ONLINE_PWD, "username": JHIPSTER_ONLINE_USER}
     r = requests.post(url, json=data)
     if r.status_code != 200:
         logger.error("Error while getting the token! status: {}, text: {}".format(r.status_code, r.text))
