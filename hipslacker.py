@@ -12,10 +12,9 @@ from dotenv import load_dotenv
 # load environment variables
 load_dotenv()
 BOT_ID = os.getenv('BOT_ID', '')
-BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN', '')
+SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN', '')
 JHIPSTER_ONLINE_USER = os.getenv('JHIPSTER_ONLINE_USER', '')
 JHIPSTER_ONLINE_PWD = os.getenv('JHIPSTER_ONLINE_PWD', '')
-
 
 # constants
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -23,7 +22,7 @@ AT_BOT = '<@' + BOT_ID + '>'
 READ_WEBSOCKET_DELAY = 1
 
 # instantiate Slack
-slack_client = SlackClient(BOT_TOKEN)
+slack_client = SlackClient(SLACK_BOT_TOKEN)
 
 
 def handle_command(command, channel, user):
@@ -39,7 +38,7 @@ def handle_command(command, channel, user):
     username = user
     try:
         # get username from Slack's API
-        username = requests.get('https://slack.com/api/users.info', params={'token': BOT_TOKEN, 'user': username}).json()['user']['name']
+        username = requests.get('https://slack.com/api/users.info', params={'token': SLACK_BOT_TOKEN, 'user': username}).json()['user']['name']
     except Exception as e:
         logger.error('Unable to get username : ' + str(e))
 
