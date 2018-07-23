@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6efb8082009963936445ea00a805b9d30210b057ec945765178670a1e18bd846"
+            "sha256": "5f4739d232f513451a5f8263c6afcdcbc04236686797cba9c7b2544a8c9e8897"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.6"
+            "python_version": "3.7"
         },
         "sources": [
             {
@@ -37,6 +37,14 @@
             ],
             "version": "==2.7"
         },
+        "python-dotenv": {
+            "hashes": [
+                "sha256:4965ed170bf51c347a89820e8050655e9c25db3837db6602e906b6d850fad85c",
+                "sha256:509736185257111613009974e666568a1b031b028b61b500ef1ab4ee780089d5"
+            ],
+            "index": "pypi",
+            "version": "==0.8.2"
+        },
         "requests": {
             "hashes": [
                 "sha256:63b52e3c866428a224f97cab011de738c36aec0185aa91cfacd418b5d58911d1",
@@ -64,6 +72,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
+            "markers": "python_version < '4' and python_version >= '2.6' and python_version != '3.2.*' and python_version != '3.3.*' and python_version != '3.0.*' and python_version != '3.1.*'",
             "version": "==1.23"
         },
         "websocket-client": {
