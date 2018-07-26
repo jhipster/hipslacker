@@ -34,4 +34,4 @@ python hipslacker.py
 
 To create a JHipster application named `my-awesome-app`, simply send a message starting with `generate` to your bot.
 
-For example: `@hipslacker generate named my-awesome-app`.
+For example: `@hipslacker generate a microservice named my-awesome-app`.
