@@ -64,7 +64,7 @@ class HipSlacker:
             self.username = requests.get('https://slack.com/api/users.info', params={'token': constants.SLACK_BOT_TOKEN, 'user': self.user}).json()['user']['name']
         except Exception as e:
             self.logger.error("Unable to get username: %s", str(e))
-            self.post_message("I was unable to get your username :boom:")
+            self.post_msg("I was unable to get your username :boom:")
             return
 
         # generate command
@@ -88,13 +88,13 @@ class HipSlacker:
 
             # post error if generation failed
             if r.status_code != 201:
-                self.log_request("Generation error", r)
-                self.post_generation_failed()
+                self.log_http("Generation error", r)
+                self.post_fail_msg()
                 return
 
             self.post_generation_status(r.text, token)
         else:
-            self.post_generation_failed()
+            self.post_fail_msg()
 
     def generate_payload(self):
         for command in self.commands:
@@ -121,7 +121,7 @@ class HipSlacker:
         # repository name
         self.payload["repository-name"] = self.payload_generator["baseName"]
 
-        self.logger.info("Payload: %s", self.payload)
+        self.logger.info("Payload: %s", json.dumps(self.payload, indent=4))
 
     def set_application_type(self, value):
         self.payload_generator["applicationType"] = value
@@ -148,7 +148,7 @@ class HipSlacker:
         data = {"password": constants.JHIPSTER_ONLINE_PWD, "username": constants.JHIPSTER_ONLINE_USER}
         r = requests.post("https://start.jhipster.tech/api/authenticate", json=data)
         if r.status_code != 200:
-            self.log_request("Error while getting the token", r)
+            self.log_http("Error while getting the token", r)
             return None
         else:
             return r.json()["id_token"]
@@ -165,21 +165,23 @@ class HipSlacker:
 
             # post error if getting status failed
             if r.status_code != 200:
-                self.log_request("Unable to get generation's status", r)
+                self.log_http("Unable to get generation's status", r)
                 self.post_with_username("Error while getting status of generation :boom:")
                 return
 
             # post status
-            self.post_message(r.text)
+            self.post_msg(r.text)
 
             # post repository's link
             if "Generation finished" in r.text:
+                self.logger.info("Generation finished")
                 self.post_with_username("Link of your application: https://github.com/hipslacker/" + self.payload["repository-name"])
                 return
 
             # post error message
             if "Generation failed" in r.text:
-                self.post_generation_failed()
+                self.logger.info("Generation failed")
+                self.post_fail_msg()
                 return
 
             # break the loop after a specific timeout
@@ -189,14 +191,14 @@ class HipSlacker:
 
             time.sleep(0.5)
 
-    def post_generation_failed(self):
+    def post_fail_msg(self):
         self.post_with_username("I was not able to generate the application :boom:")
 
     def post_with_username(self, msg):
-        self.post_message(f"Yo <@{self.username}>, " + msg)
+        self.post_msg(f"Yo <@{self.username}>, " + msg)
 
-    def post_message(self, msg):
+    def post_msg(self, msg):
         self.slack_client.api_call("chat.postMessage", channel=self.channel, text=msg, as_user=True)
 
-    def log_request(self, msg, r):
+    def log_http(self, msg, r):
         self.logger.error(f"{msg}, status: {r.status_code}, text: {r.text}")
