@@ -21,28 +21,23 @@ def handle_command(command, channel, user):
 
 def parse_slack_output(slack_rtm_output):
     """
-        The Slack Real Time Messaging API is an events firehose.
-        this parsing function returns None unless a message is
-        directed at the Bot, based on its ID.
+        Each messages are parsed
+        The method 'handle_command' is called if a message is directed to the Bot
     """
-    output_list = slack_rtm_output
-    if output_list and len(output_list) > 0:
-        for output in output_list:
+    if slack_rtm_output and len(slack_rtm_output) > 0:
+        for output in slack_rtm_output:
             if output and 'text' in output and constants.AT_BOT in output['text']:
-                return output['text'], output['channel'], output['user']
-    return None, None, None
+                handle_command(output['text'], output['channel'], output['user'])
 
 
 def run():
     """
-        Main loop that reads messages mentioning the bot with a defined delay
+        Main loop, messages are read with a given interval
     """
     if slack_client.rtm_connect(auto_reconnect=True):
         logger.info("Bot connected")
         while True:
-            command, channel, user = parse_slack_output(slack_client.rtm_read())
-            if command and channel and user:
-                handle_command(command, channel, user)
+            parse_slack_output(slack_client.rtm_read())
             time.sleep(constants.READ_WEBSOCKET_DELAY)
     else:
         logger.error("Connection failed")
