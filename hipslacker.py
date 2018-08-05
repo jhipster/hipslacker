@@ -10,7 +10,8 @@ class HipSlacker:
 
     def __init__(self, slack_client, command, channel, user):
         self.slack_client = slack_client
-        self.command = command
+        # take the command after bot's name
+        self.command = command.split(constants.AT_BOT)[1].strip().lower()
         self.channel = channel
         self.user = user
 
@@ -166,7 +167,7 @@ class HipSlacker:
             # post error if getting status failed
             if r.status_code != 200:
                 self.log_http("Unable to get generation's status", r)
-                self.post_with_username("Error while getting status of generation :boom:")
+                self.post_with_username("error while getting generation's status :boom:")
                 return
 
             # post status
@@ -175,7 +176,7 @@ class HipSlacker:
             # post repository's link
             if "Generation finished" in r.text:
                 self.logger.info("Generation finished")
-                self.post_with_username("Link of your application: https://github.com/hipslacker/" + self.payload["repository-name"])
+                self.post_with_username("here the link of your application: https://github.com/hipslacker/" + self.payload["repository-name"])
                 return
 
             # post error message
@@ -186,7 +187,7 @@ class HipSlacker:
 
             # break the loop after a specific timeout
             if time.time() > timeout:
-                self.post_with_username("The generation timed out :boom:")
+                self.post_with_username("the generation timed out :boom:")
                 return
 
             time.sleep(0.5)

@@ -42,7 +42,7 @@ def run():
         while True:
             command, channel, user = parse_slack_output(slack_client.rtm_read())
             if command and channel and user:
-                handle_command(command.split(constants.AT_BOT)[1].strip().lower(), channel, user)
+                handle_command(command, channel, user)
             time.sleep(constants.READ_WEBSOCKET_DELAY)
     else:
         logger.error("Connection failed")
