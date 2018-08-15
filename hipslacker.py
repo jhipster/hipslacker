@@ -47,8 +47,8 @@ class HipSlacker:
             "generator-jhipster": {
                 "applicationType": "monolith",
                 "baseName": "my-awesome-app",
-                "packageName": "io.github.hipslacker",
-                "packageFolder": "io/github/hipslacker/",
+                "packageName": f"io.github.{constants.JHIPSTER_ONLINE_USER}",
+                "packageFolder": f"io/github/{constants.JHIPSTER_ONLINE_USER}/",
                 "serverPort": 8080,
                 "serviceDiscoveryType": "eureka",
                 "authenticationType": "jwt",
@@ -197,7 +197,7 @@ class HipSlacker:
             # post repository's link
             if "Generation finished" in r.text:
                 self.logger.info("Generation finished")
-                self.post_with_username("here the link of your application: https://github.com/hipslacker/" + self.payload["repository-name"])
+                self.post_with_username(f"here the link of your application: https://github.com/{constants.JHIPSTER_ONLINE_USER}/{self.payload_generator['baseName']}")
                 return
 
             # post error message
@@ -217,7 +217,7 @@ class HipSlacker:
         self.post_with_username("I was not able to generate the application :boom:")
 
     def post_with_username(self, msg):
-        self.post_msg(f"Yo <@{self.username}>, " + msg)
+        self.post_msg(f"Yo <@{self.username}>, {msg}")
 
     def post_msg(self, msg):
         self.slack_client.api_call("chat.postMessage", channel=self.channel, text=msg, as_user=True)
