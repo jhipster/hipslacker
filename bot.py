@@ -45,7 +45,7 @@ def parse_slack_output(slack_rtm_output):
     """
     if slack_rtm_output and len(slack_rtm_output) > 0:
         for output in slack_rtm_output:
-            if output and 'text' in output and constants.AT_BOT in output['text']:
+            if output and 'text' in output and constants.AT_BOT in output['text'] and output['user'] != constants.BOT_ID:
                 handle_command(output['text'], output['channel'], output['user'])
 
 
