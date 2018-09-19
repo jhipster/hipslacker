@@ -47,8 +47,6 @@ class HipSlacker:
             "generator-jhipster": {
                 "applicationType": "monolith",
                 "baseName": "my-awesome-app",
-                "packageName": f"io.github.{constants.JHIPSTER_ONLINE_USER}",
-                "packageFolder": f"io/github/{constants.JHIPSTER_ONLINE_USER}/",
                 "serverPort": 8080,
                 "serviceDiscoveryType": "eureka",
                 "authenticationType": "jwt",
@@ -74,11 +72,11 @@ class HipSlacker:
                 "clientFramework": "react",
                 "jhiPrefix": "jhi"
             },
-            "git-provider": "GitHub",
             "git-company": constants.JHIPSTER_ONLINE_USER,
             "repository-name": "my-awesome-app"
         }
         self.payload_generator = self.payload["generator-jhipster"]
+        self.git_provider = "github"
 
     def process_command(self):
         # get username from Slack's API
@@ -140,8 +138,17 @@ class HipSlacker:
             if(command == "port"):
                 self.set_port()
 
+            # gitlab
+            if(command == "gitlab"):
+                self.git_provider = "gitlab"
+
         # repository name
         self.payload["repository-name"] = self.payload_generator["baseName"]
+
+        # git provider
+        self.payload["git-provider"] = self.git_provider
+        self.payload_generator["packageName"] = f"io.{self.git_provider}.{constants.JHIPSTER_ONLINE_USER}"
+        self.payload_generator["packageFolder"] = f"io/{self.git_provider}/{constants.JHIPSTER_ONLINE_USER}/"
 
         self.logger.info("Payload: %s", json.dumps(self.payload, indent=4))
 
@@ -197,7 +204,7 @@ class HipSlacker:
             # post repository's link
             if "Generation finished" in r.text:
                 self.logger.info("Generation finished")
-                self.post_with_username(f"here the link of your application: https://github.com/{constants.JHIPSTER_ONLINE_USER}/{self.payload_generator['baseName']}")
+                self.post_with_username(f"here the link of your application: https://{self.git_provider}.com/{constants.JHIPSTER_ONLINE_USER}/{self.payload_generator['baseName']}")
                 return
 
             # post error message
