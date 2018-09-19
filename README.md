@@ -35,3 +35,30 @@ python hipslacker.py
 To create a JHipster application named `my-awesome-app`, simply send a message starting with `generate` to your bot.
 
 For example: `@hipslacker generate a microservice with mongodb named my-awesome-app`.
+
+## Keywords
+
+* Name
+  * The keyword after `named` will be the application's name
+
+* Type
+  * `monolith` (default)
+  * `microservice`
+  * `gateway`
+  * `uaa`
+
+* Database
+  * `mysql` (default)
+  * `mariadb`
+  * `postgresql`
+  * `oracle`
+  * `mssql`
+  * `mongodb`
+  * `cassandra`
+
+* Port
+  * The keyword after `port` will be the application's port
+
+* Git provider
+  * `github` (default)
+  * `gitlab`
